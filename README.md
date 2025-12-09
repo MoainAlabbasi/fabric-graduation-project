@@ -1,73 +1,179 @@
-[//]: # (SPDX-License-Identifier: CC-BY-4.0)
+# 🎓 مشروع التخرج: نظام نقل الأصول باستخدام Hyperledger Fabric
 
-# Hyperledger Fabric Samples
+يقدم هذا المشروع نموذجاً كاملاً لشبكة بلوكتشين خاصة (Permissioned Blockchain) باستخدام إطار عمل **Hyperledger Fabric v2.5.9**. يهدف المشروع إلى إدارة دورة حياة الأصول الرقمية (إنشاء، نقل، استعلام) من خلال عقد ذكي (Smart Contract) مكتوب بلغة **Go (Golang)**.
 
-You can use Fabric samples to get started working with Hyperledger Fabric, explore important Fabric features, and learn how to build applications that can interact with blockchain networks using the Fabric SDKs. To learn more about Hyperledger Fabric, visit the [Fabric documentation](https://hyperledger-fabric.readthedocs.io/en/latest).
+---
 
-Note that this branch contains samples for the latest Fabric release. For older Fabric versions, refer to the corresponding branches:
+## 🗺️ خريطة المشروع وهيكلة الملفات
 
-- [release-2.2](https://github.com/hyperledger/fabric-samples/tree/release-2.2)
-- [release-1.4](https://github.com/hyperledger/fabric-samples/tree/release-1.4)
+لفهم بنية المشروع، إليك خريطة توضح أهم المجلدات والملفات ودور كل منها:
 
-## Getting started with the Fabric samples
+```
+fabric-graduation-project/
+├── 📂 test-network/              # [مجلد رئيسي] يحتوي على كل ما يلزم لتشغيل شبكة Fabric
+│   ├── network.sh               #   • [ملف تنفيذي] السكربت الأساسي لبدء، إيقاف، ونشر الشبكة
+│   ├── organizations/           #   • [مجلد] يحتوي على شهادات التشفير وهويات المنظمات (Org1, Org2)
+│   └── compose/                 #   • [مجلد] ملفات Docker Compose لتعريف الحاويات (Peers, Orderers)
+│
+├── 📂 asset-transfer-basic/       # [مجلد رئيسي] يحتوي على كود العقد الذكي بلغات مختلفة
+│   └── 📂 chaincode-go/           #   • [مجلد] كود العقد الذكي الخاص بالمشروع بلغة Go
+│       └── 📂 chaincode/
+│           └── smartcontract.go #       • [ملف الكود] منطق العقد الذكي، تعريف الأصول، والوظائف
+│
+├── 📂 bin/                        # [مجلد] يحتوي على الأدوات التنفيذية لـ Fabric (peer, orderer, configtxgen)
+│
+└── 📂 config/                     # [مجلد] يحتوي على ملفات الإعدادات الأساسية للشبكة (configtx.yaml)
+```
 
-To use the Fabric samples, you need to download the Fabric Docker images and the Fabric CLI tools. First, make sure that you have installed all of the [Fabric prerequisites](https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html). You can then follow the instructions to [Install the Fabric Samples, Binaries, and Docker Images](https://hyperledger-fabric.readthedocs.io/en/latest/install.html) in the Fabric documentation. In addition to downloading the Fabric images and tool binaries, the Fabric samples will also be cloned to your local machine.
+---
 
-## Test network
+## 🧠 شرح العقد الذكي (Smart Contract)
 
-The [Fabric test network](test-network) in the samples repository provides a Docker Compose based test network with two
-Organization peers and an ordering service node. You can use it on your local machine to run the samples listed below.
-You can also use it to deploy and test your own Fabric chaincodes and applications. To get started, see
-the [test network tutorial](https://hyperledger-fabric.readthedocs.io/en/latest/test_network.html).
+يقع العقد الذكي في ملف `asset-transfer-basic/chaincode-go/chaincode/smartcontract.go` وهو المسؤول عن منطق الأعمال (Business Logic) في الشبكة.
 
-The [Kubernetes Test Network](test-network-k8s) sample builds upon the Compose network, constructing a Fabric
-network with peer, orderer, and CA infrastructure nodes running on Kubernetes.  In addition to providing a sample
-Kubernetes guide, the Kube test network can be used as a platform to author and debug _cloud ready_ Fabric Client
-applications on a development or CI workstation.
+### 1. هيكل بيانات الأصل (Asset Structure)
 
+يتم تعريف كل أصل في الشبكة باستخدام الهيكل التالي:
 
-## Asset transfer samples and tutorials
+| الحقل (Field)   | النوع (Type) | الوصف                                      |
+| :-------------- | :------------ | :----------------------------------------- |
+| `ID`            | `string`      | المعرّف الفريد لكل أصل (مثل: "asset1")      |
+| `Color`         | `string`      | لون الأصل (مثل: "blue")                   |
+| `Size`          | `int`         | حجم الأصل (مثل: 5)                         |
+| `Owner`         | `string`      | مالك الأصل الحالي (مثل: "Tomoko")          |
+| `AppraisedValue`| `int`         | القيمة التقديرية للأصل (مثل: 300)           |
 
-The asset transfer series provides a series of sample smart contracts and applications to demonstrate how to store and transfer assets using Hyperledger Fabric.
-Each sample and associated tutorial in the series demonstrates a different core capability in Hyperledger Fabric. The **Basic** sample provides an introduction on how
-to write smart contracts and how to interact with a Fabric network using the Fabric SDKs. The **Ledger queries**, **Private data**, and **State-based endorsement**
-samples demonstrate these additional capabilities. Finally, the **Secured agreement** sample demonstrates how to bring all the capabilities together to securely
-transfer an asset in a more realistic transfer scenario.
+### 2. الوظائف المتاحة (Available Functions)
 
-|  **Smart Contract** | **Description** | **Tutorial** | **Smart contract languages** | **Application languages** |
-| -----------|------------------------------|----------|---------|---------|
-| [Basic](asset-transfer-basic) | The Basic sample smart contract that allows you to create and transfer an asset by putting data on the ledger and retrieving it. This sample is recommended for new Fabric users. | [Writing your first application](https://hyperledger-fabric.readthedocs.io/en/latest/write_first_app.html) | Go, JavaScript, TypeScript, Java | Go, TypeScript, Java |
-| [Ledger queries](asset-transfer-ledger-queries) | The ledger queries sample demonstrates range queries and transaction updates using range queries (applicable for both LevelDB and CouchDB state databases), and how to deploy an index with your chaincode to support JSON queries (applicable for CouchDB state database only). | [Using CouchDB](https://hyperledger-fabric.readthedocs.io/en/latest/couchdb_tutorial.html) | Go, JavaScript | Java, JavaScript |
-| [Private data](asset-transfer-private-data) | This sample demonstrates the use of private data collections, how to manage private data collections with the chaincode lifecycle, and how the private data hash can be used to verify private data on the ledger. It also demonstrates how to control asset updates and transfers using client-based ownership and access control. | [Using Private Data](https://hyperledger-fabric.readthedocs.io/en/latest/private_data_tutorial.html) | Go, TypeScript, Java | TypeScript |
-| [State-Based Endorsement](asset-transfer-sbe) | This sample demonstrates how to override the chaincode-level endorsement policy to set endorsement policies at the key-level (data/asset level). | [Using State-based endorsement](https://github.com/hyperledger/fabric-samples/tree/main/asset-transfer-sbe) | Java, TypeScript | JavaScript |
-| [Secured agreement](asset-transfer-secured-agreement) | Smart contract that uses implicit private data collections, state-based endorsement, and organization-based ownership and access control to keep data private and securely transfer an asset with the consent of both the current owner and buyer. | [Secured asset transfer](https://hyperledger-fabric.readthedocs.io/en/latest/secured_asset_transfer/secured_private_asset_transfer_tutorial.html)  | Go | TypeScript |
-| [Events](asset-transfer-events) | The events sample demonstrates how smart contracts can emit events that are read by the applications interacting with the network. | [README](asset-transfer-events/README.md)  | Go, JavaScript, Java | Go, TypeScript, Java |
-| [Attribute-based access control](asset-transfer-abac) | Demonstrates the use of attribute and identity based access control using a simple asset transfer scenario | [README](asset-transfer-abac/README.md)  | Go | _None_ |
+يوفر العقد الذكي مجموعة من الوظائف للتفاعل مع سجل البلوكتشين (Ledger):
 
-## Full stack asset transfer guide
+| الوظيفة (Function)   | الوصف                                                               |
+| :-------------------- | :------------------------------------------------------------------- |
+| `InitLedger`          | تقوم بإنشاء مجموعة من الأصول الافتراضية عند بدء تشغيل الشبكة لأول مرة. |
+| `CreateAsset`         | إنشاء أصل جديد بمعلومات محددة وإضافته إلى السجل.                    |
+| `ReadAsset`           | استرجاع بيانات أصل معين باستخدام `ID` الخاص به.                      |
+| `UpdateAsset`         | تحديث بيانات أصل موجود في السجل.                                    |
+| `DeleteAsset`         | حذف أصل من السجل.                                                   |
+| `AssetExists`         | التحقق مما إذا كان أصل معين موجوداً في السجل أم لا.                  |
+| `TransferAsset`       | نقل ملكية أصل من مالك إلى آخر.                                       |
+| `GetAllAssets`        | استرجاع قائمة بجميع الأصول الموجودة في السجل.                        |
 
-The [full stack asset transfer guide](full-stack-asset-transfer-guide#readme) workshop demonstrates how a generic asset transfer solution for Hyperledger Fabric can be developed and deployed. This covers chaincode development, client application development, and deployment to a production-like environment.
+---
 
-## Additional samples
+## 🚀 الخيار 1: التشغيل السريع عبر GitHub Codespaces (موصى به)
 
-Additional samples demonstrate various Fabric use cases and application patterns.
+يمكنك تشغيل الشبكة بالكامل مباشرة من المتصفح دون الحاجة لتثبيت أي برامج على جهازك الشخصي.
 
-|  **Sample** | **Description** | **Documentation** |
-| -------------|------------------------------|------------------|
-| [Off chain data](off_chain_data) | Learn how to use block events to build an off-chain database for reporting and analytics. | [Peer channel-based event services](https://hyperledger-fabric.readthedocs.io/en/latest/peer_event_services.html) |
-| [Token SDK](token-sdk) | Sample REST API around the Hyperledger Labs [Token SDK](https://github.com/hyperledger-labs/fabric-token-sdk) for privacy friendly (zero knowledge proof) UTXO transactions. | [README](token-sdk/README.md) |
-| [Token ERC-20](token-erc-20) | Smart contract demonstrating how to create and transfer fungible tokens using an account-based model. | [README](token-erc-20/README.md) |
-| [Token UTXO](token-utxo) | Smart contract demonstrating how to create and transfer fungible tokens using a UTXO (unspent transaction output) model. | [README](token-utxo/README.md) |
-| [Token ERC-1155](token-erc-1155) | Smart contract demonstrating how to create and transfer multiple tokens (both fungible and non-fungible) using an account based model. | [README](token-erc-1155/README.md) |
-| [Token ERC-721](token-erc-721) | Smart contract demonstrating how to create and transfer non-fungible tokens using an account-based model. | [README](token-erc-721/README.md) |
-| [High throughput](high-throughput) | Learn how you can design your smart contract to avoid transaction collisions in high volume environments. | [README](high-throughput/README.md) |
-| [Simple Auction](auction-simple) | Run an auction where bids are kept private until the auction is closed, after which users can reveal their bid. | [README](auction-simple/README.md) |
-| [Dutch Auction](auction-dutch) | Run an auction in which multiple items of the same type can be sold to more than one buyer. This example also includes the ability to add an auditor organization. | [README](auction-dutch/README.md) |
+1.  اضغط على الزر الأخضر **Code** في أعلى الصفحة.
+2.  اختر التبويب **Codespaces**.
+3.  اضغط على **Create codespace on main**.
 
+### ⚡ خطوات الإعداد (داخل شاشة Codespaces):
 
-## License <a name="license"></a>
+بمجرد أن تفتح شاشة التيرمينال (Terminal)، قم بنسخ وتشغيل الأوامر التالية بالترتيب:
 
-Hyperledger Project source code files are made available under the Apache
-License, Version 2.0 (Apache-2.0), located in the [LICENSE](LICENSE) file.
-Hyperledger Project documentation files are made available under the Creative
-Commons Attribution 4.0 International License (CC-BY-4.0), available at http://creativecommons.org/licenses/by/4.0/.
+**1. تثبيت أدوات Fabric والملفات التنفيذية:**
+*(هذا الأمر ضروري لتحميل ملفات `peer` و `orderer` التي لا يتم تخزينها في GitHub)*
+
+```bash
+curl -sSL https://bit.ly/2ysbOFE | bash -s -- 2.5.9 1.5.7
+```
+
+**2. الانتقال إلى مجلد شبكة الاختبار:**
+
+```bash
+cd test-network
+```
+
+**3. تشغيل الشبكة وإنشاء القناة:**
+
+```bash
+./network.sh up createChannel
+```
+
+**4. نشر العقد الذكي (Go):**
+
+```bash
+./network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-go -ccl go
+```
+
+---
+
+## 💻 الخيار 2: التشغيل على الجهاز المحلي (Local Machine)
+
+إذا كنت تفضل تشغيل المشروع على جهازك الخاص، اتبع التعليمات التالية بدقة.
+
+### 📋 المتطلبات المسبقة (Prerequisites)
+
+تأكد من تثبيت البرامج التالية:
+
+*   **نظام التشغيل:** Ubuntu Linux (أو Windows مع تفعيل **WSL2**).
+*   **Git:** أحدث إصدار.
+*   **cURL:** أحدث إصدار.
+*   **Docker & Docker Compose:** ضروري لتشغيل الحاويات.
+*   **Go (Golang):** الإصدار 1.20 أو أحدث.
+
+### 🛠️ خطوات التثبيت
+
+**1. استنساخ المستودع (Clone):**
+
+```bash
+git clone https://github.com/MoainAlabbasi/fabric-graduation-project.git
+cd fabric-graduation-project
+```
+
+**2. تحميل الملفات التنفيذية (Binaries):**
+
+```bash
+curl -sSL https://bit.ly/2ysbOFE | bash -s -- 2.5.9 1.5.7
+```
+
+**3. تشغيل الشبكة:**
+
+```bash
+cd test-network
+./network.sh down   # لتنظيف أي إعدادات سابقة
+./network.sh up createChannel
+```
+
+**4. نشر العقد الذكي:**
+
+```bash
+./network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-go -ccl go
+```
+
+---
+
+## ✅ اختبار الشبكة والتفاعل معها (Testing)
+
+بعد اكتمال التثبيت، يمكنك التفاعل مع السجل (Ledger) كالتالي:
+
+**1. ضبط متغيرات البيئة (للعمل بصلاحية مسؤول Org1):**
+
+```bash
+export PATH=${PWD}/../bin:$PATH
+export FABRIC_CFG_PATH=$PWD/../config/
+export CORE_PEER_TLS_ENABLED=true
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CORE_PEER_TLS_ROOTCERT_FILE=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+export CORE_PEER_ADDRESS=localhost:7051
+```
+
+**2. إنشاء أصول أولية (Init Ledger):**
+
+```bash
+peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" -C mychannel -n basic --peerAddresses localhost:7051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt" --peerAddresses localhost:9051 --tlsRootCertFiles "${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt" -c '{"function":"InitLedger","Args":[]}'
+```
+
+**3. الاستعلام عن جميع الأصول (Query All Assets):**
+
+```bash
+peer chaincode query -C mychannel -n basic -c '{"function":"GetAllAssets","Args":[]}'
+```
+
+---
+
+## 📄 الترخيص (License)
+
+يتم توفير ملفات كود مصدر مشروع Hyperledger بموجب ترخيص Apache، الإصدار 2.0 (Apache-2.0)، الموجود في ملف `LICENSE`.
