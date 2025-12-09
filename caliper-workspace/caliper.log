@@ -1,0 +1,5 @@
+2025.12.09-01:52:43.869[90m debug[39m [caliper] [rateControl.js] 	Constructed a winston logger with the specified settings
+2025.12.09-01:52:43.991[33m warn [39m [caliper] [bind] 	Working directory not specified. Using "/home/ubuntu/fabric-samples/caliper-workspace"
+2025.12.09-01:52:43.993[32m info [39m [caliper] [bind] 	Binding for fabric@2.2. This might take some time...
+2025.12.09-01:52:43.993[32m info [39m [caliper] [bind] 	Using working directory: /home/ubuntu/fabric-samples/caliper-workspace
+2025.12.09-01:52:43.993[32m info [39m [caliper] [bind] 	Calling npm with: install fabric-network@2.2.3 fabric-ca-client@2.2.3
